@@ -20,7 +20,7 @@
 #include "EfiVariable.h"
 #include "StatusVar.h"
 
-char const StatusVar_Name[] = "NvStrapsReBarStatus";
+char const StatusVar_Name[MAX_VARIABLE_NAME_LENGTH] = "NvStrapsReBarStatus";
 
 #if defined(UEFI_SOURCE) || defined(EFIAPI)
 static uint_least8_t nVarCount = 2u;
