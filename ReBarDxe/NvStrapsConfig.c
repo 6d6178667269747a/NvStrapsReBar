@@ -28,7 +28,7 @@
 
 #include "NvStrapsConfig.h"
 
-char const NvStrapsConfig_VarName[] = "NvStrapsReBar";
+char const NvStrapsConfig_VarName[MAX_VARIABLE_NAME_LENGTH] = "NvStrapsReBar";
 static NvStrapsConfig strapsConfig;
 
 static void GPUSelector_unpack(BYTE const *buffer, NvStraps_GPUSelector *selector)

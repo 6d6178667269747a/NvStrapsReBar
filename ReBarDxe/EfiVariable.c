@@ -58,7 +58,7 @@ struct __attribute__((__packed__)) rebarVar
 # endif
 #endif
 
-ERROR_CODE ReadEfiVariable(char const *name, BYTE *buffer, uint_least32_t *size)
+ERROR_CODE ReadEfiVariable(char const name[MAX_VARIABLE_NAME_LENGTH], BYTE *buffer, uint_least32_t *size)
 {
 #if defined(UEIF_SOURCE) || defined(EFIAPI)
     CHAR16 varName[MAX_VARIABLE_NAME_LENGTH + 1u];
