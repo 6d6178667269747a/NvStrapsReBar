@@ -49,7 +49,7 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
     return NULL;
     }
 
-    uint_least8_t paddingLength = 8u - *dataLength & 0b0000'0111u;
+    uint_least8_t paddingLength = (8u - *dataLength) & 0b0000'0111u;
 
     status = gBS->AllocatePool(EfiBootServicesData, *dataLength + paddingLength, (VOID **)&data);
 

@@ -300,11 +300,10 @@ void pciSaveAndRemapBridgeConfig(UINTN bridgePciAddress, UINT32 bridgeSaveArea[3
         return;
     }
 
-        UINT32 bridgeIoRange = ioBaseLimit & 0xFF00u | ioBaseLimit >> BYTE_BITSIZE & 0x00FFu;
-        UINT32
-                bridgeCommand = bridgeSaveArea[0u] | EFI_PCI_COMMAND_IO_SPACE | EFI_PCI_COMMAND_MEMORY_SPACE | EFI_PCI_COMMAND_BUS_MASTER,
-                bridgeIoBaseLimit = bridgeSaveArea[1u] & UINT32_C(0xFFFF'0000) | bridgeIoRange & UINT32_C(0x0000'FFFF),
-                bridgeMemoryBaseLimit = (baseAddress0 >> 16u & UINT32_C(0x0000'FFF0) | topAddress0 & UINT32_C(0xFFF0'0000));
+        UINT32 bridgeIoRange = (ioBaseLimit & 0xFF00u) | (ioBaseLimit >> BYTE_BITSIZE & 0x00FFu);
+        UINT32 bridgeCommand = bridgeSaveArea[0u] | (EFI_PCI_COMMAND_IO_SPACE | EFI_PCI_COMMAND_MEMORY_SPACE | EFI_PCI_COMMAND_BUS_MASTER);
+        UINT32 bridgeIoBaseLimit = (bridgeSaveArea[1u] & UINT32_C(0xFFFF'0000)) | (bridgeIoRange & UINT32_C(0x0000'FFFF));
+        UINT32 bridgeMemoryBaseLimit = ((baseAddress0 >> 16u & UINT32_C(0x0000'FFF0)) | (topAddress0 & UINT32_C(0xFFF0'0000)));
 
         efiError = efiError || EFI_ERROR((status = pciWriteConfigDword(bridgePciAddress, PCI_MEMORY_BASE,    &bridgeMemoryBaseLimit)));
         efiError = efiError || EFI_ERROR((status = pciWriteConfigDword(bridgePciAddress, PCI_IO_BASE,        &bridgeIoBaseLimit)));

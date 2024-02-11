@@ -27,7 +27,7 @@ static uint_least64_t statusVar[NvStraps_GPU_MAX_COUNT + 1u] = { StatusVar_NotLo
 
 static inline uint_least16_t MakeBusLocation(uint_least8_t bus, uint_least8_t device, uint_least8_t function)
 {
-    return (uint_least16_t)bus << 8u | ((uint_least16_t)device & 0b0001'1111u) << 3u | function & 0b0111u;
+    return (uint_least16_t)bus << 8u | (((uint_least16_t)device & 0b0001'1111u) << 3u) | (function & 0b0111u);
 }
 
 static inline UINT16 PciAddressToBusLocation(UINTN pciAddress)
@@ -38,8 +38,8 @@ static inline UINT16 PciAddressToBusLocation(UINTN pciAddress)
 static EFI_STATUS WriteStatusVar(uint_least16_t pciLocation)
 {
     uint_least64_t var =
-           (uint_least64_t)pciLocation << (WORD_BITSIZE + DWORD_BITSIZE)
-         | (uint_least64_t)statusVar[0u] & UINT64_C(0x0000FFFF'FFFFFFFF);
+           ((uint_least64_t)pciLocation << (WORD_BITSIZE + DWORD_BITSIZE))
+         | ((uint_least64_t)statusVar[0u] & UINT64_C(0x0000FFFF'FFFFFFFF));
 
     BYTE buffer[QWORD_SIZE];
 

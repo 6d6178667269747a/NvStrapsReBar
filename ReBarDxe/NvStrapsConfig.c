@@ -53,7 +53,7 @@ static BYTE *GPUSelector_pack(BYTE *buffer, NvStraps_GPUSelector const *selector
     buffer = pack_WORD(buffer, selector->subsysVendorID);
     buffer = pack_WORD(buffer, selector->subsysDeviceID);
     buffer = pack_BYTE(buffer, selector->bus);
-    buffer = pack_BYTE(buffer, (uint_least8_t)((unsigned)selector->device << 3u & 0b1111'1000u | (unsigned)selector->function & 0b0111u));
+    buffer = pack_BYTE(buffer, (uint_least8_t)(((unsigned)selector->device << 3u & 0b1111'1000u) | ((unsigned)selector->function & 0b0111u)));
     buffer = pack_BYTE(buffer, selector->barSizeSelector);
     buffer = pack_BYTE(buffer, selector->overrideBarSizeMask);
 
@@ -81,7 +81,7 @@ static BYTE *GPUConfig_pack(BYTE *buffer, NvStraps_GPUConfig const *config)
     buffer = pack_WORD(buffer, config->subsysVendorID);
     buffer = pack_WORD(buffer, config->subsysDeviceID);
     buffer = pack_BYTE(buffer, config->bus);
-    buffer = pack_BYTE(buffer, (unsigned)config->device << 3u & 0b1111'1000u | (unsigned)config->function & 0b0111u);
+    buffer = pack_BYTE(buffer, ((unsigned)config->device << 3u & 0b1111'1000u) | ((unsigned)config->function & 0b0111u));
     buffer = pack_QWORD(buffer, config->bar0.base);
     buffer = pack_QWORD(buffer, config->bar0.top);
 
@@ -96,8 +96,8 @@ static void BridgeConfig_unpack(BYTE const *buffer, NvStraps_BridgeConfig *confi
 
     uint_least8_t busPos = unpack_BYTE(buffer); buffer += BYTE_SIZE;
 
-    config->bridgeDevice        = config->bridgeBus == 0xFF && busPos == 0xFFu ? 0xFFu : busPos >> 3u & 0b0001'1111u;
-    config->bridgeFunction      = config->bridgeBus == 0xFF && busPos == 0xFFu ? 0xFFu : busPos & 0b0111u;
+    config->bridgeDevice        = (config->bridgeBus == 0xFF && busPos == 0xFFu) ? 0xFFu : (busPos >> 3u & 0b0001'1111u);
+    config->bridgeFunction      = (config->bridgeBus == 0xFF && busPos == 0xFFu) ? 0xFFu : (busPos & 0b0111u);
 
     config->bridgeSecondaryBus  = unpack_BYTE(buffer), buffer += BYTE_SIZE;
 }
@@ -107,7 +107,7 @@ static UINT8 *BridgeConfig_pack(BYTE *buffer, NvStraps_BridgeConfig  const *conf
     buffer = pack_WORD(buffer, config->vendorID);
     buffer = pack_WORD(buffer, config->deviceID);
     buffer = pack_BYTE(buffer, config->bridgeBus);
-    buffer = pack_BYTE(buffer, (unsigned)config->bridgeDevice << 3u & 0b1111'1000u | (unsigned)config->bridgeFunction & 0b0111u);
+    buffer = pack_BYTE(buffer, ((unsigned)config->bridgeDevice << 3u & 0b1111'1000u) | ((unsigned)config->bridgeFunction & 0b0111u));
     buffer = pack_BYTE(buffer, config->bridgeSecondaryBus);
 
     return buffer;
@@ -378,7 +378,7 @@ uint_least32_t NvStrapsConfig_HasBridgeDevice(NvStrapsConfig const *config, uint
     if (index == WORD_BITMASK)
     return (uint_least32_t)WORD_BITMASK << WORD_BITSIZE | WORD_BITMASK;
 
-    return (uint_least32_t)config->bridge[index].deviceID << WORD_BITSIZE | config->bridge[index].vendorID & WORD_BITMASK;
+    return ((uint_least32_t)config->bridge[index].deviceID << WORD_BITSIZE) | (config->bridge[index].vendorID & WORD_BITMASK);
 }
 
 static void NvStraps_UpdateGPUConfig(NvStrapsConfig *config, unsigned gpuIndex, NvStraps_GPUConfig const *gpuConfig)

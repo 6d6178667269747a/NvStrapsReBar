@@ -101,8 +101,8 @@ static bool ConfigureNvStrapsBAR1Size(EFI_PHYSICAL_ADDRESS baseAddress0, UINT8 b
     CopyMem(&STRAPS1, pSTRAPS1, sizeof STRAPS1);
 
     UINT8
-        barSize_Part1 = STRAPS0 >> BAR1_SIZE_PART1_SHIFT & (UINT32_C(1) << BAR1_SIZE_PART1_BITSIZE) - 1u,
-        barSize_Part2 = STRAPS1 >> BAR1_SIZE_PART2_SHIFT & (UINT32_C(1) << BAR1_SIZE_PART2_BITSIZE) - 1u;
+        barSize_Part1 = STRAPS0 >> BAR1_SIZE_PART1_SHIFT & ((UINT32_C(1) << BAR1_SIZE_PART1_BITSIZE) - 1u),
+        barSize_Part2 = STRAPS1 >> BAR1_SIZE_PART2_SHIFT & ((UINT32_C(1) << BAR1_SIZE_PART2_BITSIZE) - 1u);
 
     UINT8
         targetBarSize_Part1 = barSize < 3u ? barSize : barSize < 10u ? 2u           : 3u,
