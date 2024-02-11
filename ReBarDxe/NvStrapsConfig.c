@@ -244,36 +244,32 @@ NvStraps_BarSize NvStrapsConfig_LookupBarSize(NvStrapsConfig const *config, uint
     BarSizeSelector barSizeSelector = BarSizeSelector_None;
 
     for (unsigned iGPU = 0u; iGPU < config->nGPUSelector; iGPU++)
-        if (NvStrapsConfig_GPUSelector_DeviceMatch(config->GPUs + iGPU, deviceID))
-            if (NvStrapsConfig_GPUSelector_HasSubsystem(config->GPUs + iGPU))
-                if (NvStrapsConfig_GPUSelector_SubsystemMatch(config->GPUs + iGPU, subsysVenID, subsysDevID))
-                    if (NvStrapsConfig_GPUSelector_HasBusLocation(config->GPUs + iGPU))
-                        if (NvStrapsConfig_GPUSelector_BusLocationMatch(config->GPUs + iGPU, bus, dev, fn))
-                if (config->GPUs[iGPU].barSizeSelector != BarSizeSelector_None)
-                {
-                NvStraps_BarSize sizeSelector = { .priority = EXPLICIT_PCI_LOCATION, .barSizeSelector = (BarSizeSelector)config->GPUs[iGPU].barSizeSelector };
-
-                return sizeSelector;
-                }
-                else
-                ;
-                        else
-                            ;
-                    else
+    {
+        if (!NvStrapsConfig_GPUSelector_DeviceMatch(config->GPUs + iGPU, deviceID))
+        {
+            continue;
+        }
+        if (!NvStrapsConfig_GPUSelector_HasSubsystem(config->GPUs + iGPU))
+        {
+            if (configPriority < EXPLICIT_SUBSYSTEM_ID && config->GPUs[iGPU].barSizeSelector != BarSizeSelector_None)
+                configPriority = EXPLICIT_PCI_ID, barSizeSelector = (BarSizeSelector)config->GPUs[iGPU].barSizeSelector;
+            continue;
+        }
+        if (!NvStrapsConfig_GPUSelector_SubsystemMatch(config->GPUs + iGPU, subsysVenID, subsysDevID))
+        {
+            continue;
+        }
+        if (!NvStrapsConfig_GPUSelector_HasBusLocation(config->GPUs + iGPU))
+        {
             if (config->GPUs[iGPU].barSizeSelector != BarSizeSelector_None)
                 configPriority = EXPLICIT_SUBSYSTEM_ID, barSizeSelector = (BarSizeSelector)config->GPUs[iGPU].barSizeSelector;
-            else
-                ;
-                else
-                    ;
-            else
-        if (config->GPUs[iGPU].barSizeSelector != BarSizeSelector_None)
-        {
-            if (configPriority < EXPLICIT_SUBSYSTEM_ID)
-            configPriority = EXPLICIT_PCI_ID, barSizeSelector = (BarSizeSelector)config->GPUs[iGPU].barSizeSelector;
         }
-        else
-            ;
+        else if (NvStrapsConfig_GPUSelector_BusLocationMatch(config->GPUs + iGPU, bus, dev, fn) && config->GPUs[iGPU].barSizeSelector != BarSizeSelector_None)
+        {
+            NvStraps_BarSize sizeSelector = { .priority = EXPLICIT_PCI_LOCATION, .barSizeSelector = (BarSizeSelector)config->GPUs[iGPU].barSizeSelector };
+            return sizeSelector;
+        }
+    }
 
     if (configPriority == UNCONFIGURED && NvStrapsConfig_IsGlobalEnable(config))
     {
@@ -303,36 +299,32 @@ NvStraps_BarSizeMaskOverride NvStrapsConfig_LookupBarSizeMaskOverride(NvStrapsCo
     bool barSizeMaskOverride = false;
 
     for (unsigned iGPU = 0u; iGPU < config->nGPUSelector; iGPU++)
-        if (NvStrapsConfig_GPUSelector_DeviceMatch(config->GPUs + iGPU, deviceID))
-            if (NvStrapsConfig_GPUSelector_HasSubsystem(config->GPUs + iGPU))
-                if (NvStrapsConfig_GPUSelector_SubsystemMatch(config->GPUs + iGPU, subsysVenID, subsysDevID))
-                    if (NvStrapsConfig_GPUSelector_HasBusLocation(config->GPUs + iGPU))
-                        if (NvStrapsConfig_GPUSelector_BusLocationMatch(config->GPUs + iGPU, bus, dev, fn))
-                if (config->GPUs[iGPU].overrideBarSizeMask)
+    {
+        if (!NvStrapsConfig_GPUSelector_DeviceMatch(config->GPUs + iGPU, deviceID))
+        {
+            if (config->GPUs[iGPU].overrideBarSizeMask &&configPriority < EXPLICIT_SUBSYSTEM_ID && config->GPUs[iGPU].overrideBarSizeMask)
+            {
+                    configPriority = EXPLICIT_PCI_ID, barSizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu;
+            }
+            continue;
+        }
+        if (!NvStrapsConfig_GPUSelector_HasSubsystem(config->GPUs + iGPU))
+        {
+            continue;
+        }
+        if (NvStrapsConfig_GPUSelector_SubsystemMatch(config->GPUs + iGPU, subsysVenID, subsysDevID) &&
+            NvStrapsConfig_GPUSelector_HasBusLocation(config->GPUs + iGPU) &&
+            NvStrapsConfig_GPUSelector_BusLocationMatch(config->GPUs + iGPU, bus, dev, fn) &&
+            config->GPUs[iGPU].overrideBarSizeMask)
                 {
                 NvStraps_BarSizeMaskOverride maskOverride = { .priority = EXPLICIT_PCI_LOCATION, .sizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu };
-
                 return maskOverride;
                 }
-                else
-                ;
-                        else
-                            ;
-                    else
-            if (config->GPUs[iGPU].overrideBarSizeMask)
-                configPriority = EXPLICIT_SUBSYSTEM_ID, barSizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu;
-            else
-                ;
-                else
-                    ;
-            else
         if (config->GPUs[iGPU].overrideBarSizeMask)
         {
-            if (configPriority < EXPLICIT_SUBSYSTEM_ID)
-            configPriority = EXPLICIT_PCI_ID, barSizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu;
+            configPriority = EXPLICIT_SUBSYSTEM_ID, barSizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu;
         }
-        else
-            ;
+    }
 
     if (configPriority == UNCONFIGURED)
     {
@@ -411,21 +403,16 @@ bool NvStrapsConfig_SetGPUConfig(NvStrapsConfig *config, NvStraps_GPUConfig cons
 {
     unsigned gpuIndex = NvStrapsConfig_FindGPUConfig(config, gpuConfig->bus, gpuConfig->device, gpuConfig->function);
 
-    if (gpuIndex == WORD_BITMASK)
+    if (gpuIndex != WORD_BITMASK)
+    {
+        NvStraps_UpdateGPUConfig(config, gpuIndex, gpuConfig);
+        return true;
+    }
     if (config->nGPUConfig < ARRAY_SIZE(config->gpuConfig))
     {
         config->gpuConfig[config->nGPUConfig++] = *gpuConfig;
         config->dirty = true;
-
         return true;
-    }
-    else
-        ;
-    else
-    {
-    NvStraps_UpdateGPUConfig(config, gpuIndex, gpuConfig);
-
-    return true;
     }
 
     return false;
@@ -447,21 +434,16 @@ bool NvStrapsConfig_SetBridgeConfig(NvStrapsConfig *config, NvStraps_BridgeConfi
 {
     unsigned bridgeIndex = NvStrapsConfig_FindBridgeConfig(config, bridgeConfig->bridgeBus, bridgeConfig->bridgeDevice, bridgeConfig->bridgeFunction);
 
-    if (bridgeIndex == WORD_BITMASK)
+    if (bridgeIndex != WORD_BITMASK)
+    {
+        NvStrapsConfig_UpdateBridgeConfig(config, bridgeIndex, bridgeConfig);
+        return true;
+    }
     if (config->nBridgeConfig < ARRAY_SIZE(config->bridge))
     {
         config->bridge[config->nBridgeConfig++] = *bridgeConfig;
         config->dirty = true;
-
         return true;
-    }
-    else
-        ;
-    else
-    {
-    NvStrapsConfig_UpdateBridgeConfig(config, bridgeIndex, bridgeConfig);
-
-    return true;
     }
 
     return false;

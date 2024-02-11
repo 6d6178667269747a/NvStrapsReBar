@@ -24,10 +24,12 @@ static uint_least64_t ecma128_crc64(BYTE const *buffer, BYTE const *bufferEnd, u
     crcValue ^= unpack_QWORD(buffer), buffer += QWORD_SIZE;
 
     for (unsigned char bitIndex = 0u; bitIndex < QWORD_BITSIZE; bitIndex++)
+        {
         if (crcValue & UINT64_C(1) << (QWORD_BITSIZE - 1u))
         crcValue <<= 1u, crcValue ^= ECMA_128_CRC_POLY;
         else
         crcValue <<= 1u;
+        }
     }
 
     return ~crcValue & (uint_least64_t)UINT64_C(0xFFFF'FFFF'FFFF'FFFF);
@@ -54,7 +56,6 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
     if (EFI_ERROR(status))
     {
     SetEFIError(EFIError_AllocateSetupVarData, status);
-
     return NULL;
     }
 
@@ -67,16 +68,14 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
     {
     gBS->FreePool(data), data = NULL;
     SetEFIError(EFIError_ReadSetupVar, status);
-
     return NULL;
     }
 
-    if (   (attributes & (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)) != (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)
+    if ((attributes & (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)) != (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)
     || (attributes & EFI_VARIABLE_HARDWARE_ERROR_RECORD))
     {
     gBS->FreePool(data), data = NULL;
     SetStatusVar(StatusVar_BadSetupVarAttributes);
-
     return NULL;
     }
 
@@ -94,7 +93,6 @@ static bool FreeSetupVariable(BYTE *data)
     if (EFI_ERROR(status))
     {
         SetEFIError(EFIError_AllocateSetupVarData, status);
-
         return false;
     }
     }
@@ -219,18 +217,22 @@ static bool NextUefiVariableName(UefiString *str, EFI_GUID *efiGUID)
     EFI_STATUS status = gRT->GetNextVariableName(&length, str->ptr, efiGUID);
 
     if (EFI_ERROR(status) && status == EFI_BUFFER_TOO_SMALL)
+    {
     if (ReallocateUefiString(str, ++length))
         status = gRT->GetNextVariableName(&length, str->ptr, efiGUID);
     else
         return false;
+    }
 
     if (EFI_ERROR(status))
+    {
     if (status == EFI_NOT_FOUND)
         length = 0u;
     else
     {
         SetEFIError(EFIError_EnumVar, status);
         return false;
+        }
     }
 
     str->length = LStringLength(str->ptr, str->capacity);
@@ -260,21 +262,24 @@ static CHAR16 const *FindSetupVariable(EFI_GUID *efiGUID)
 
     while (NextUefiVariableName(&varName, efiGUID))
     {
-    if (varName.length)
+        if (varName.length == 0)
     {
+            enumerationCompleted = true;
+            break;
+        }
         if (varName.length == ARRAY_SIZE(CUSTOM_VAR_NAME) - 1u && CompareUefiString(&varName, CUSTOM_VAR_NAME) == 0)
-        if (setupVarName < SetupVar_Custom)
+        {
+            if (setupVarName < SetupVar_Custom)
         {
             setupVarName = SetupVar_Custom;
             varGuid = *efiGUID;
         }
-        else
-            if (setupVarName == SetupVar_Custom)
+            else if (setupVarName == SetupVar_Custom)
+            {
             multipleCustomVariables = true;		// "Custom" variable found twice
-            else
-            ;					// "Setup" variable has precedence over "Custom"
-        else
-        if (varName.length == ARRAY_SIZE(SETUP_VAR_NAME) - 1u && CompareUefiString(&varName, SETUP_VAR_NAME) == 0)
+            }
+        }
+        else if (varName.length == ARRAY_SIZE(SETUP_VAR_NAME) - 1u && CompareUefiString(&varName, SETUP_VAR_NAME) == 0)
         {
             UINTN varSize = 0u;
 
@@ -287,7 +292,8 @@ static CHAR16 const *FindSetupVariable(EFI_GUID *efiGUID)
             }
 
             if (varSize >= 16u /* && !!(attributes & EFI_VARIABLE_NON_VOLATILE) && !!(attributes & EFI_VARIABLE_BOOTSERVICE_ACCESS) */)
-            if (setupVarName < SetupVar_Setup)
+            {
+                if (setupVarName < SetupVar_Setup)
             {
                 setupVarName = SetupVar_Setup;
                 varGuid = *efiGUID;
@@ -301,11 +307,6 @@ static CHAR16 const *FindSetupVariable(EFI_GUID *efiGUID)
                 break;
             }
         }
-    }
-    else
-    {
-        enumerationCompleted = true;
-        break;
     }
     }
 
