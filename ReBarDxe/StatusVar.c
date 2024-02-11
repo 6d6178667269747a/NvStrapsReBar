@@ -3,7 +3,7 @@
 # include <Uefi.h>
 # include <Library/UefiRuntimeServicesTableLib.h>
 
-# include "LocalPciGpu.h"
+# include "LocalPciGPU.h"
 #else
 # if defined(WINDOWS) || defined(_WINDOWS) || defined(_WIN32) || defined(_WIN64)
 #  if defined(_M_AMD64) && !defined(_AMD64_)
