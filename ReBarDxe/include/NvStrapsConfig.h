@@ -234,219 +234,36 @@ uint_least32_t NvStrapsConfig_HasBridgeDevice(NvStrapsConfig const *config, uint
 NvStrapsConfig *GetNvStrapsConfig(bool reload, ERROR_CODE *errorCode);
 void SaveNvStrapsConfig(ERROR_CODE *errorCode);
 
-inline uint_least8_t NvStrapsConfig_TargetPciBarSizeSelector(NvStrapsConfig const *config)
-{
-    return config->nPciBarSize;
-}
-
-inline uint_least8_t NvStrapsConfig_SetTargetPciBarSizeSelector(NvStrapsConfig *config, uint_least8_t barSizeSelector)
-{
-    uint_least8_t pciBarSize = config->nPciBarSize;
-    config->dirty = barSizeSelector != config->nPciBarSize;
-
-    return config->nPciBarSize = barSizeSelector, pciBarSize;
-}
-
-inline uint_least8_t NvStrapsConfig_IsGlobalEnable(NvStrapsConfig const *config)
-{
-    return config->nGlobalEnable;
-}
-
-inline uint_least8_t NvStrapsConfig_SetGlobalEnable(NvStrapsConfig *config, uint_least8_t globalEnable)
-{
-    uint_least8_t oldGlobalEnable = config->nGlobalEnable;
-    config->dirty = globalEnable != config->nGlobalEnable;
-
-    return config->nGlobalEnable = globalEnable, oldGlobalEnable;
-}
-
-inline bool NvStrapsConfig_IsDirty(NvStrapsConfig const *config)
-{
-    return config->dirty;
-}
-
-inline bool NvStrapsConfig_SetIsDirty(NvStrapsConfig *config, bool dirtyFlag)
-{
-    bool oldFlag = config->dirty;
-    return config->dirty = dirtyFlag, oldFlag;
-}
-
-inline bool NvStrapsConfig_IsGpuConfigured(NvStrapsConfig const *config)
-{
-    return config->nGlobalEnable || config->nGPUSelector;
-}
-
-inline bool NvStrapsConfig_IsDriverConfigured(NvStrapsConfig const *config)
-{
-    return NvStrapsConfig_TargetPciBarSizeSelector(config) || NvStrapsConfig_IsGpuConfigured(config);
-}
-
-inline bool NvStrapsConfig_GPUSelector_DeviceMatch(NvStraps_GPUSelector const *selector, uint_least16_t devID)
-{
-    return selector->deviceID == devID;
-}
-
-inline bool NvStrapsConfig_GPUSelector_SubsystemMatch(NvStraps_GPUSelector const *selector, uint_least16_t subsysVenID, uint_least16_t subsysDevID)
-{
-    return selector->subsysVendorID == subsysVenID && selector->subsysDeviceID == subsysDevID;
-}
-
-inline bool NvStrapsConfig_GPUSelector_BusLocationMatch(NvStraps_GPUSelector const *selector, uint_least8_t busNr, uint_least8_t dev, uint_least8_t func)
-{
-    return selector->bus == busNr && selector->device == dev && selector->function == func;
-}
-
-inline bool NvStrapsConfig_GPUConfig_DeviceMatch(NvStraps_GPUConfig const *config, uint_least16_t devID)
-{
-    return config->deviceID == devID;
-}
-
-inline bool NvStrapsConfig_GPUConfig_SubsystemMatch(NvStraps_GPUConfig const *config, uint_least16_t subsysVenID, uint_least16_t subsysDevID)
-{
-    return config->subsysVendorID == subsysVenID && config->subsysDeviceID == subsysDevID;
-}
-
-inline bool NvStrapsConfig_BridgeConfig_DeviceMatch(NvStraps_BridgeConfig const *config, uint_least16_t venID, uint_least16_t devID)
-{
-    return config->vendorID == venID && config->deviceID == devID;
-}
-
-inline bool NvStrapsConfig_BridgeConfig_BusLocationMatch(NvStraps_BridgeConfig const *config, uint_least8_t bus, uint_least8_t dev, uint_least8_t func)
-{
-    return config->bridgeBus == bus && config->bridgeDevice == dev && config->bridgeFunction == func;
-}
-
 #if defined(__cplusplus)
 }       // extern "C"
 #endif
 
 #if defined(__cplusplus) && !defined(NVSTRAPS_DXE_DRIVER)
-inline bool NvStrapsConfig::setGPUSelector(uint_least8_t barSizeSelector, uint_least16_t deviceID)
-{
-     return setGPUSelector(barSizeSelector, deviceID, MAX_UINT16, MAX_UINT16);
-}
-
-inline bool NvStrapsConfig::setGPUSelector(uint_least8_t barSizeSelector, uint_least16_t deviceID, uint_least16_t subsysVenID, uint_least16_t subsysDevID)
-{
-    return setGPUSelector(barSizeSelector, deviceID, subsysVenID, subsysDevID, MAX_UINT8, MAX_UINT8, MAX_UINT8);
-}
-
-inline bool NvStrapsConfig::setGPUConfig(NvStraps_GPUConfig const &config)
-{
-    return NvStrapsConfig_SetGPUConfig(this, &config);
-}
-
-inline bool NvStrapsConfig::setBridgeConfig(NvStraps_BridgeConfig const &config)
-{
-    return NvStrapsConfig_SetBridgeConfig(this, &config);
-}
-
-inline bool NvStrapsConfig::clearGPUSelector(uint_least16_t deviceID)
-{
-    return clearGPUSelector(deviceID, MAX_UINT16, MAX_UINT16);
-}
-
-inline bool NvStrapsConfig::clearGPUSelector(uint_least16_t deviceID, uint_least16_t subsysVenID, uint_least16_t subsysDevID)
-{
-    return clearGPUSelector(deviceID, subsysVenID, subsysDevID, MAX_UINT8, MAX_UINT8, MAX_UINT8);
-}
-
-inline bool NvStraps_GPUSelector::deviceMatch(uint_least16_t devID) const
-{
-    return NvStrapsConfig_GPUSelector_DeviceMatch(this, devID);
-}
-
-inline bool NvStraps_GPUSelector::subsystemMatch(uint_least16_t subsysVenID, uint_least16_t subsysDevID) const
-{
-    return NvStrapsConfig_GPUSelector_SubsystemMatch(this, subsysVenID, subsysDevID);
-}
-
-inline bool NvStraps_GPUSelector::busLocationMatch(uint_least8_t busNr, uint_least8_t dev, uint_least8_t fn) const
-{
-    return NvStrapsConfig_GPUSelector_BusLocationMatch(this, busNr, dev, fn);
-}
-
-inline bool NvStraps_GPUConfig::deviceMatch(uint_least16_t matchDeviceID) const
-{
-    return NvStrapsConfig_GPUConfig_DeviceMatch(this, matchDeviceID);
-}
-
-inline bool NvStraps_GPUConfig::subsystemMatch(uint_least16_t subsysVenID, uint_least16_t subsysDevID) const
-{
-    return NvStrapsConfig_GPUConfig_SubsystemMatch(this, subsysVenID, subsysDevID);
-}
-
-inline bool NvStraps_BridgeConfig::deviceMatch(uint_least16_t venID, uint_least16_t devID) const
-{
-    return NvStrapsConfig_BridgeConfig_DeviceMatch(this, venID, devID);
-}
-
-inline bool NvStraps_BridgeConfig::busLocationMatch(uint_least8_t bus, uint_least8_t dev, uint_least8_t func) const
-{
-    return NvStrapsConfig_BridgeConfig_BusLocationMatch(this, bus, dev, func);
-}
-
-inline bool NvStrapsConfig::resetConfig()
-{
-    return NvStrapsConfig_ResetConfig(this);
-}
-
-inline bool NvStrapsConfig::clearGPUSelectors()
-{
-    return dirty = !!nGPUSelector, !!std::exchange(nGPUSelector, 0u);
-}
-
-inline bool NvStrapsConfig::isDirty() const
-{
-    return NvStrapsConfig_IsDirty(this);
-}
-
-inline bool NvStrapsConfig::isDirty(bool fDirty)
-{
-    return NvStrapsConfig_SetIsDirty(this, fDirty);
-}
-
-inline uint_least8_t NvStrapsConfig::isGlobalEnable() const
-{
-    return NvStrapsConfig_IsGlobalEnable(this);
-}
-
-inline uint_least8_t NvStrapsConfig::setGlobalEnable(uint_least8_t val)
-{
-    return NvStrapsConfig_SetGlobalEnable(this, val);
-}
-
-inline uint_least8_t NvStrapsConfig::targetPciBarSizeSelector() const
-{
-    return NvStrapsConfig_TargetPciBarSizeSelector(this);
-}
-
-inline uint_least8_t NvStrapsConfig::targetPciBarSizeSelector(uint_least8_t barSizeSelector)
-{
-    return NvStrapsConfig_SetTargetPciBarSizeSelector(this, barSizeSelector);
-}
-
-inline NvStraps_BarSize NvStrapsConfig::lookupBarSize(uint_least16_t deviceID, uint_least16_t subsysVenID, uint_least16_t subsysDevID, uint_least8_t bus, uint_least8_t dev, uint_least8_t fn) const
-{
-    return NvStrapsConfig_LookupBarSize(this, deviceID, subsysVenID, subsysDevID, bus, dev, fn);
-}
-
-inline std::tuple<uint_least16_t, uint_least16_t> NvStrapsConfig::hasBridgeDevice(uint_least8_t bridgeBus, uint_least8_t bridgeDevice, uint_least8_t bridgeFunction) const
-{
-    auto deviceID = uint_least32_t { NvStrapsConfig_HasBridgeDevice(this, bridgeBus, bridgeDevice, bridgeFunction) };
-
-    return std::tuple { deviceID & WORD_BITMASK, deviceID >> WORD_BITSIZE & WORD_BITMASK };
-}
-
-inline NvStraps_BridgeConfig const *NvStrapsConfig::lookupBridgeConfig(uint_least8_t bridgeSecondaryBus) const
-{
-    return NvStrapsConfig_LookupBridgeConfig(this, bridgeSecondaryBus);
-}
-
-inline NvStraps_GPUConfig const *NvStrapsConfig::lookupGPUConfig(uint_least8_t bus, uint_least8_t dev, uint_least8_t fn) const
-{
-    return NvStrapsConfig_LookupGPUConfig(this, bus, dev, fn);
-}
+bool NvStrapsConfig::setGPUSelector(uint_least8_t barSizeSelector, uint_least16_t deviceID);
+bool NvStrapsConfig::setGPUSelector(uint_least8_t barSizeSelector, uint_least16_t deviceID, uint_least16_t subsysVenID, uint_least16_t subsysDevID);
+bool NvStrapsConfig::setGPUConfig(NvStraps_GPUConfig const &config);
+bool NvStrapsConfig::setBridgeConfig(NvStraps_BridgeConfig const &config);
+bool NvStrapsConfig::clearGPUSelector(uint_least16_t deviceID);
+bool NvStrapsConfig::clearGPUSelector(uint_least16_t deviceID, uint_least16_t subsysVenID, uint_least16_t subsysDevID);
+bool NvStraps_GPUSelector::deviceMatch(uint_least16_t devID) const;
+bool NvStraps_GPUSelector::subsystemMatch(uint_least16_t subsysVenID, uint_least16_t subsysDevID) const;
+bool NvStraps_GPUSelector::busLocationMatch(uint_least8_t busNr, uint_least8_t dev, uint_least8_t fn) const;
+bool NvStraps_GPUConfig::deviceMatch(uint_least16_t matchDeviceID) const;
+bool NvStraps_GPUConfig::subsystemMatch(uint_least16_t subsysVenID, uint_least16_t subsysDevID) const;
+bool NvStraps_BridgeConfig::deviceMatch(uint_least16_t venID, uint_least16_t devID) const
+bool NvStraps_BridgeConfig::busLocationMatch(uint_least8_t bus, uint_least8_t dev, uint_least8_t func) const;
+bool NvStrapsConfig::resetConfig();
+bool NvStrapsConfig::clearGPUSelectors();
+bool NvStrapsConfig::isDirty() const;
+bool NvStrapsConfig::isDirty(bool fDirty);
+uint_least8_t NvStrapsConfig::isGlobalEnable() const;
+uint_least8_t NvStrapsConfig::setGlobalEnable(uint_least8_t val);
+uint_least8_t NvStrapsConfig::targetPciBarSizeSelector() const;
+uint_least8_t NvStrapsConfig::targetPciBarSizeSelector(uint_least8_t barSizeSelector);
+NvStraps_BarSize NvStrapsConfig::lookupBarSize(uint_least16_t deviceID, uint_least16_t subsysVenID, uint_least16_t subsysDevID, uint_least8_t bus, uint_least8_t dev, uint_least8_t fn) const;
+std::tuple<uint_least16_t, uint_least16_t> NvStrapsConfig::hasBridgeDevice(uint_least8_t bridgeBus, uint_least8_t bridgeDevice, uint_least8_t bridgeFunction) const;
+NvStraps_BridgeConfig const *NvStrapsConfig::lookupBridgeConfig(uint_least8_t bridgeSecondaryBus) const;
+NvStraps_GPUConfig const *NvStrapsConfig::lookupGPUConfig(uint_least8_t bus, uint_least8_t dev, uint_least8_t fn) const;
 
 #endif          // defined(__cplusplus) && !defined(NVSTRAPS_DXE_DRIVER)
 

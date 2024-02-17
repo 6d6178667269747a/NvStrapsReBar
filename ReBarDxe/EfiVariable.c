@@ -17,7 +17,6 @@
 
 #include <uchar.h>
 
-#include "LocalAppConfig.h"
 #include "EfiVariable.h"
 
 // e3ee4a27-e2a2-4435-bba3-184ccad935a8                    // the PLATFROM_GUID from .dsc file
@@ -57,6 +56,65 @@ struct __attribute__((__packed__)) rebarVar
 
 # endif
 #endif
+
+uint_least8_t unpack_BYTE(BYTE const *buffer)
+{
+    return *buffer;
+}
+
+uint_least16_t unpack_WORD(BYTE const *buffer)
+{
+    return *buffer | (uint_least16_t)buffer[1u] << BYTE_BITSIZE;
+}
+
+uint_least32_t unpack_DWORD(BYTE const *buffer)
+{
+    return *buffer
+	| (uint_least16_t)buffer[1u] <<	     BYTE_BITSIZE
+	| (uint_least32_t)buffer[2u] << 2u * BYTE_BITSIZE
+	| (uint_least32_t)buffer[3u] << 3u * BYTE_BITSIZE;
+}
+
+uint_least64_t unpack_QWORD(BYTE const *buffer)
+{
+    return *buffer
+	| (uint_least16_t)buffer[1u] <<      BYTE_BITSIZE
+	| (uint_least32_t)buffer[2u] << 2u * BYTE_BITSIZE
+	| (uint_least32_t)buffer[3u] << 3u * BYTE_BITSIZE
+        | (uint_least64_t)buffer[4u] << 4u * BYTE_BITSIZE
+	| (uint_least64_t)buffer[5u] << 5u * BYTE_BITSIZE
+	| (uint_least64_t)buffer[6u] << 6u * BYTE_BITSIZE
+	| (uint_least64_t)buffer[7u] << 7u * BYTE_BITSIZE;
+}
+
+BYTE *pack_BYTE(BYTE *buffer, uint_least8_t value)
+{
+    return *buffer++ = value, buffer;
+}
+
+BYTE *pack_WORD(BYTE *buffer, uint_least16_t value)
+{
+    *buffer++ = value & BYTE_BITMASK, value >>= BYTE_BITSIZE;
+    *buffer++ = value & BYTE_BITMASK;
+
+    return buffer;
+}
+
+BYTE *pack_DWORD(BYTE *buffer, uint_least32_t value)
+{
+    for (unsigned i = 0u; i < DWORD_SIZE; i++)
+	*buffer++ = value & BYTE_BITMASK, value >>= BYTE_BITSIZE;
+
+    return buffer;
+}
+
+BYTE *pack_QWORD(BYTE *buffer, uint_least64_t value)
+{
+    for (unsigned i = 0u; i < QWORD_SIZE; i++)
+	*buffer++ = value & BYTE_BITMASK, value >>= BYTE_BITSIZE;
+
+    return buffer;
+}
 
 ERROR_CODE ReadEfiVariable(char const name[MAX_VARIABLE_NAME_LENGTH], BYTE *buffer, uint_least32_t *size)
 {
