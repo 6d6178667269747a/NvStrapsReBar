@@ -316,10 +316,10 @@ NvStraps_BarSizeMaskOverride NvStrapsConfig_LookupBarSizeMaskOverride(NvStrapsCo
             NvStrapsConfig_GPUSelector_HasBusLocation(config->GPUs + iGPU) &&
             NvStrapsConfig_GPUSelector_BusLocationMatch(config->GPUs + iGPU, bus, dev, fn) &&
             config->GPUs[iGPU].overrideBarSizeMask)
-                {
-                NvStraps_BarSizeMaskOverride maskOverride = { .priority = EXPLICIT_PCI_LOCATION, .sizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu };
-                return maskOverride;
-                }
+        {
+            NvStraps_BarSizeMaskOverride maskOverride = { .priority = EXPLICIT_PCI_LOCATION, .sizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu };
+            return maskOverride;
+        }
         if (config->GPUs[iGPU].overrideBarSizeMask)
         {
             configPriority = EXPLICIT_SUBSYSTEM_ID, barSizeMaskOverride = config->GPUs[iGPU].overrideBarSizeMask != 0xFFu;
@@ -328,8 +328,8 @@ NvStraps_BarSizeMaskOverride NvStrapsConfig_LookupBarSizeMaskOverride(NvStrapsCo
 
     if (configPriority == UNCONFIGURED)
     {
-    configPriority = FOUND_GLOBAL;
-    barSizeMaskOverride = NvStrapsConfig_OverrideBarSizeMask(config);
+        configPriority = FOUND_GLOBAL;
+        barSizeMaskOverride = NvStrapsConfig_OverrideBarSizeMask(config);
     }
 
     NvStraps_BarSizeMaskOverride maskOverride = { .priority = configPriority, .sizeMaskOverride = barSizeMaskOverride };
@@ -384,19 +384,19 @@ uint_least32_t NvStrapsConfig_HasBridgeDevice(NvStrapsConfig const *config, uint
 static void NvStraps_UpdateGPUConfig(NvStrapsConfig *config, unsigned gpuIndex, NvStraps_GPUConfig const *gpuConfig)
 {
     if (config->gpuConfig[gpuIndex].deviceID != gpuConfig->deviceID)
-    config->gpuConfig[gpuIndex].deviceID = gpuConfig->deviceID, config->dirty = true;
+        config->gpuConfig[gpuIndex].deviceID = gpuConfig->deviceID, config->dirty = true;
 
     if (config->gpuConfig[gpuIndex].subsysVendorID != gpuConfig->subsysVendorID)
-    config->gpuConfig[gpuIndex].subsysVendorID = gpuConfig->subsysVendorID, config->dirty = true;
+        config->gpuConfig[gpuIndex].subsysVendorID = gpuConfig->subsysVendorID, config->dirty = true;
 
     if (config->gpuConfig[gpuIndex].subsysDeviceID != gpuConfig->subsysDeviceID)
-    config->gpuConfig[gpuIndex].subsysDeviceID = gpuConfig->subsysDeviceID, config->dirty = true;
+        config->gpuConfig[gpuIndex].subsysDeviceID = gpuConfig->subsysDeviceID, config->dirty = true;
 
     if (config->gpuConfig[gpuIndex].bar0.base != gpuConfig->bar0.base)
-    config->gpuConfig[gpuIndex].bar0.base = gpuConfig->bar0.base, config->dirty = true;
+        config->gpuConfig[gpuIndex].bar0.base = gpuConfig->bar0.base, config->dirty = true;
 
     if (config->gpuConfig[gpuIndex].bar0.top != gpuConfig->bar0.top)
-    config->gpuConfig[gpuIndex].bar0.top = gpuConfig->bar0.top, config->dirty = true;
+        config->gpuConfig[gpuIndex].bar0.top = gpuConfig->bar0.top, config->dirty = true;
 }
 
 bool NvStrapsConfig_SetGPUConfig(NvStrapsConfig *config, NvStraps_GPUConfig const *gpuConfig)
@@ -421,13 +421,13 @@ bool NvStrapsConfig_SetGPUConfig(NvStrapsConfig *config, NvStraps_GPUConfig cons
 static void NvStrapsConfig_UpdateBridgeConfig(NvStrapsConfig *config, unsigned bridgeIndex, NvStraps_BridgeConfig const *bridgeConfig)
 {
     if (config->bridge[bridgeIndex].vendorID != bridgeConfig->vendorID)
-    config->bridge[bridgeIndex].vendorID = bridgeConfig->vendorID, config->dirty = true;
+        config->bridge[bridgeIndex].vendorID = bridgeConfig->vendorID, config->dirty = true;
 
     if (config->bridge[bridgeIndex].deviceID != bridgeConfig->deviceID)
-    config->bridge[bridgeIndex].deviceID = bridgeConfig->deviceID, config->dirty = true;
+        config->bridge[bridgeIndex].deviceID = bridgeConfig->deviceID, config->dirty = true;
 
     if (config->bridge[bridgeIndex].bridgeSecondaryBus != bridgeConfig->bridgeSecondaryBus)
-    config->bridge[bridgeIndex].bridgeSecondaryBus = bridgeConfig->bridgeSecondaryBus, config->dirty = true;
+        config->bridge[bridgeIndex].bridgeSecondaryBus = bridgeConfig->bridgeSecondaryBus, config->dirty = true;
 }
 
 bool NvStrapsConfig_SetBridgeConfig(NvStrapsConfig *config, NvStraps_BridgeConfig const *bridgeConfig)

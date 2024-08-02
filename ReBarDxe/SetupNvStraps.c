@@ -69,25 +69,22 @@ bool NvStraps_CheckDevice(UINTN pciAddress, uint_least16_t vendorId, uint_least1
     if (EFI_ERROR(status))
         return SetEFIError(EFIError_PCI_DeviceSubsystem, status), false;
 
-        uint_least8_t bus, device, fun;
+    uint_least8_t bus, device, fun;
 
     pciUnpackAddress(pciAddress, &bus, &device, &fun);
 
-        NvStraps_BarSize barSizeSelector =
-            NvStrapsConfig_LookupBarSize(config, deviceId, *subsysVenID, *subsysDevID, bus, device, fun);
+    NvStraps_BarSize barSizeSelector =
+        NvStrapsConfig_LookupBarSize(config, deviceId, *subsysVenID, *subsysDevID, bus, device, fun);
 
-        if (barSizeSelector.priority == UNCONFIGURED || barSizeSelector.barSizeSelector == BarSizeSelector_None || barSizeSelector.barSizeSelector == BarSizeSelector_Excluded)
-        {
-            SetDeviceStatusVar(pciAddress, barSizeSelector.barSizeSelector == BarSizeSelector_Excluded ? StatusVar_GpuExcluded : StatusVar_GPU_Unconfigured);
-            return false;
-        }
+    if (barSizeSelector.priority == UNCONFIGURED || barSizeSelector.barSizeSelector == BarSizeSelector_None || barSizeSelector.barSizeSelector == BarSizeSelector_Excluded)
+    {
+        SetDeviceStatusVar(pciAddress, barSizeSelector.barSizeSelector == BarSizeSelector_Excluded ? StatusVar_GpuExcluded : StatusVar_GPU_Unconfigured);
+        return false;
+    }
 
     SetDeviceStatusVar(pciAddress, StatusVar_GpuFound);
 
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 static bool ConfigureNvStrapsBAR1Size(EFI_PHYSICAL_ADDRESS baseAddress0, UINT8 barSize)

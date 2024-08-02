@@ -21,14 +21,14 @@ static uint_least64_t ecma128_crc64(BYTE const *buffer, BYTE const *bufferEnd, u
 
     while (buffer != bufferEnd)
     {
-    crcValue ^= unpack_QWORD(buffer), buffer += QWORD_SIZE;
+        crcValue ^= unpack_QWORD(buffer), buffer += QWORD_SIZE;
 
-    for (unsigned char bitIndex = 0u; bitIndex < QWORD_BITSIZE; bitIndex++)
+        for (unsigned char bitIndex = 0u; bitIndex < QWORD_BITSIZE; bitIndex++)
         {
-        if (crcValue & UINT64_C(1) << (QWORD_BITSIZE - 1u))
-        crcValue <<= 1u, crcValue ^= ECMA_128_CRC_POLY;
-        else
-        crcValue <<= 1u;
+            if (crcValue & UINT64_C(1) << (QWORD_BITSIZE - 1u))
+            crcValue <<= 1u, crcValue ^= ECMA_128_CRC_POLY;
+            else
+            crcValue <<= 1u;
         }
     }
 
@@ -45,8 +45,8 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
 
     if (status != EFI_BUFFER_TOO_SMALL)
     {
-    SetEFIError(EFIError_ReadSetupVarSize, status);
-    return NULL;
+        SetEFIError(EFIError_ReadSetupVarSize, status);
+        return NULL;
     }
 
     uint_least8_t paddingLength = (8u - *dataLength) & 0b0000'0111u;
@@ -55,8 +55,8 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
 
     if (EFI_ERROR(status))
     {
-    SetEFIError(EFIError_AllocateSetupVarData, status);
-    return NULL;
+        SetEFIError(EFIError_AllocateSetupVarData, status);
+        return NULL;
     }
 
     for (unsigned i = 0u; i < paddingLength; i++)
@@ -66,17 +66,17 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
 
     if (EFI_ERROR(status))
     {
-    gBS->FreePool(data), data = NULL;
-    SetEFIError(EFIError_ReadSetupVar, status);
-    return NULL;
+        gBS->FreePool(data), data = NULL;
+        SetEFIError(EFIError_ReadSetupVar, status);
+        return NULL;
     }
 
     if ((attributes & (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)) != (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)
     || (attributes & EFI_VARIABLE_HARDWARE_ERROR_RECORD))
     {
-    gBS->FreePool(data), data = NULL;
-    SetStatusVar(StatusVar_BadSetupVarAttributes);
-    return NULL;
+        gBS->FreePool(data), data = NULL;
+        SetStatusVar(StatusVar_BadSetupVarAttributes);
+        return NULL;
     }
 
     *dataLength += paddingLength;
@@ -88,13 +88,13 @@ static bool FreeSetupVariable(BYTE *data)
 {
     if (data)
     {
-    EFI_STATUS status = gBS->FreePool(data);
+        EFI_STATUS status = gBS->FreePool(data);
 
-    if (EFI_ERROR(status))
-    {
-        SetEFIError(EFIError_AllocateSetupVarData, status);
-        return false;
-    }
+        if (EFI_ERROR(status))
+        {
+            SetEFIError(EFIError_AllocateSetupVarData, status);
+            return false;
+        }
     }
 
     return true;
@@ -114,12 +114,12 @@ static UINTN LStringLength(CHAR16 const *str, UINTN stringCapacity)
 {
     if (stringCapacity)
     {
-    CHAR16 const *ptr = str, *endPtr = str + stringCapacity - 1u;
+        CHAR16 const *ptr = str, *endPtr = str + stringCapacity - 1u;
 
-    while (ptr != endPtr && *ptr)
-        ptr++;
+        while (ptr != endPtr && *ptr)
+            ptr++;
 
-    return *ptr ? 0u : ptr - str;
+        return *ptr ? 0u : ptr - str;
     }
 
     return 0u;
@@ -139,8 +139,8 @@ static bool AllocateUefiString(UefiString *str, size_t stringCapacity)
 
     if (EFI_ERROR(status))
     {
-    SetEFIError(EFIError_AllocateSetupVarName, status);
-    return false;
+        SetEFIError(EFIError_AllocateSetupVarName, status);
+        return false;
     }
 
     str->capacity = stringCapacity;
@@ -179,8 +179,8 @@ static bool ReallocateUefiString(UefiString *str, size_t stringCapacity)
 
     if (EFI_ERROR(status))
     {
-    SetEFIError(EFIError_AllocateSetupVarName, status);
-    return false;
+        SetEFIError(EFIError_AllocateSetupVarName, status);
+        return false;
     }
 
     UINTN length = str->length < stringCapacity ? str->length : stringCapacity ? stringCapacity - 1u : 0u;
@@ -189,11 +189,11 @@ static bool ReallocateUefiString(UefiString *str, size_t stringCapacity)
 
     if (DeallocateUefiString(str))
     {
-    str->ptr = newStr;
-    str->capacity = stringCapacity;
-    str->length = length;
+        str->ptr = newStr;
+        str->capacity = stringCapacity;
+        str->length = length;
 
-    return true;
+        return true;
     }
     else
     gBS->FreePool(newStr);
@@ -218,20 +218,20 @@ static bool NextUefiVariableName(UefiString *str, EFI_GUID *efiGUID)
 
     if (EFI_ERROR(status) && status == EFI_BUFFER_TOO_SMALL)
     {
-    if (ReallocateUefiString(str, ++length))
-        status = gRT->GetNextVariableName(&length, str->ptr, efiGUID);
-    else
-        return false;
+        if (ReallocateUefiString(str, ++length))
+            status = gRT->GetNextVariableName(&length, str->ptr, efiGUID);
+        else
+            return false;
     }
 
     if (EFI_ERROR(status))
     {
-    if (status == EFI_NOT_FOUND)
-        length = 0u;
-    else
-    {
-        SetEFIError(EFIError_EnumVar, status);
-        return false;
+        if (status == EFI_NOT_FOUND)
+            length = 0u;
+        else
+        {
+            SetEFIError(EFIError_EnumVar, status);
+            return false;
         }
     }
 
@@ -263,20 +263,20 @@ static CHAR16 const *FindSetupVariable(EFI_GUID *efiGUID)
     while (NextUefiVariableName(&varName, efiGUID))
     {
         if (varName.length == 0)
-    {
+        {
             enumerationCompleted = true;
             break;
         }
         if (varName.length == ARRAY_SIZE(CUSTOM_VAR_NAME) - 1u && CompareUefiString(&varName, CUSTOM_VAR_NAME) == 0)
         {
             if (setupVarName < SetupVar_Custom)
-        {
-            setupVarName = SetupVar_Custom;
-            varGuid = *efiGUID;
-        }
+            {
+                setupVarName = SetupVar_Custom;
+                varGuid = *efiGUID;
+            }
             else if (setupVarName == SetupVar_Custom)
             {
-            multipleCustomVariables = true;		// "Custom" variable found twice
+                multipleCustomVariables = true;		// "Custom" variable found twice
             }
         }
         else if (varName.length == ARRAY_SIZE(SETUP_VAR_NAME) - 1u && CompareUefiString(&varName, SETUP_VAR_NAME) == 0)
@@ -287,27 +287,27 @@ static CHAR16 const *FindSetupVariable(EFI_GUID *efiGUID)
 
             if (status != EFI_BUFFER_TOO_SMALL)
             {
-            SetEFIError(EFIError_EnumSetupVarSize, status);
-            return NULL;
+                SetEFIError(EFIError_EnumSetupVarSize, status);
+                return NULL;
             }
 
             if (varSize >= 16u /* && !!(attributes & EFI_VARIABLE_NON_VOLATILE) && !!(attributes & EFI_VARIABLE_BOOTSERVICE_ACCESS) */)
             {
                 if (setupVarName < SetupVar_Setup)
-            {
-                setupVarName = SetupVar_Setup;
-                varGuid = *efiGUID;
-            }
-            else
-            {
-                // "Setup" variable found twice
-                setupVarName = SetupVar_None;
-                multipleCustomVariables = true;
-                enumerationCompleted = true;
-                break;
+                {
+                    setupVarName = SetupVar_Setup;
+                    varGuid = *efiGUID;
+                }
+                else
+                {
+                    // "Setup" variable found twice
+                    setupVarName = SetupVar_None;
+                    multipleCustomVariables = true;
+                    enumerationCompleted = true;
+                    break;
+                }
             }
         }
-    }
     }
 
     if (DeallocateUefiString(&varName))
@@ -316,22 +316,22 @@ static CHAR16 const *FindSetupVariable(EFI_GUID *efiGUID)
         switch (setupVarName)
         {
         case SetupVar_Custom:
-        if (multipleCustomVariables)
-        {
-            SetStatusVar(StatusVar_AmbiguousSetupVariable);
-            return NULL;
-        }
+            if (multipleCustomVariables)
+            {
+                SetStatusVar(StatusVar_AmbiguousSetupVariable);
+                return NULL;
+            }
 
-        *efiGUID = varGuid;
-        return CUSTOM_VAR_NAME;
+            *efiGUID = varGuid;
+            return CUSTOM_VAR_NAME;
 
         case SetupVar_Setup:
-        *efiGUID = varGuid;
-        return SETUP_VAR_NAME;
+            *efiGUID = varGuid;
+            return SETUP_VAR_NAME;
 
         default:
-        SetStatusVar(multipleCustomVariables ? StatusVar_AmbiguousSetupVariable : StatusVar_MissingSetupVariable);
-        return NULL;
+            SetStatusVar(multipleCustomVariables ? StatusVar_AmbiguousSetupVariable : StatusVar_MissingSetupVariable);
+            return NULL;
         }
     }
 
@@ -362,20 +362,20 @@ bool IsSetupVariableChanged()
 
     if (FreeSetupVariable(data))
     {
-    data = NULL;
+        data = NULL;
 
-    if (NvStrapsConfig_HasSetupVarCRC(config))
-        return NvStrapsConfig_SetupVarCRC(config) != crc64;
+        if (NvStrapsConfig_HasSetupVarCRC(config))
+            return NvStrapsConfig_SetupVarCRC(config) != crc64;
 
-    NvStrapsConfig_SetSetupVarCRC(config, crc64);
-    NvStrapsConfig_SetHasSetupVarCRC(config, true);
+        NvStrapsConfig_SetSetupVarCRC(config, crc64);
+        NvStrapsConfig_SetHasSetupVarCRC(config, true);
 
-    SaveNvStrapsConfig(&errorCode);
+        SaveNvStrapsConfig(&errorCode);
 
-    if (EFI_ERROR(errorCode))
-        SetEFIError(EFIError_WriteConfigVar, errorCode);
+        if (EFI_ERROR(errorCode))
+            SetEFIError(EFIError_WriteConfigVar, errorCode);
 
-    return false;
+        return false;
     }
 
     return true;
