@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include <Uefi.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -13,11 +11,11 @@
 static CHAR16 const SETUP_VAR_NAME[] = L"Setup";
 static CHAR16 const CUSTOM_VAR_NAME[] = L"Custom";
 
-static uint_least64_t const ECMA_128_CRC_POLY = UINT64_C(0xC96C'5795'D787'0F42);
+static UINT64 const ECMA_128_CRC_POLY = UINT64_C(0xC96C'5795'D787'0F42);
 
-static uint_least64_t ecma128_crc64(BYTE const *buffer, BYTE const *bufferEnd, uint_least64_t crcValue)
+static UINT64 ecma128_crc64(BYTE const *buffer, BYTE const *bufferEnd, UINT64 crcValue)
 {
-    crcValue = ~crcValue & (uint_least64_t)UINT64_C(0xFFFF'FFFF'FFFF'FFFF);
+    crcValue = ~crcValue & (UINT64)UINT64_C(0xFFFF'FFFF'FFFF'FFFF);
 
     while (buffer != bufferEnd)
     {
@@ -32,7 +30,7 @@ static uint_least64_t ecma128_crc64(BYTE const *buffer, BYTE const *bufferEnd, u
         }
     }
 
-    return ~crcValue & (uint_least64_t)UINT64_C(0xFFFF'FFFF'FFFF'FFFF);
+    return ~crcValue & (UINT64)UINT64_C(0xFFFF'FFFF'FFFF'FFFF);
 }
 
 static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLength)
@@ -49,7 +47,7 @@ static BYTE *LoadSetupVariable(CHAR16 const *name, EFI_GUID *guid, UINTN *dataLe
         return NULL;
     }
 
-    uint_least8_t paddingLength = (8u - *dataLength) & 0b0000'0111u;
+    UINT8 paddingLength = (8u - *dataLength) & 0b0000'0111u;
 
     status = gBS->AllocatePool(EfiBootServicesData, *dataLength + paddingLength, (VOID **)&data);
 
@@ -358,7 +356,7 @@ bool IsSetupVariableChanged()
     if (!data)
     return true;
 
-    uint_least64_t crc64 = ecma128_crc64(data, data + length, 0u);
+    UINT64 crc64 = ecma128_crc64(data, data + length, 0u);
 
     if (FreeSetupVariable(data))
     {
