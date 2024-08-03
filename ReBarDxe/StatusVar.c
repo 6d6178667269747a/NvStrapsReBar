@@ -24,12 +24,12 @@ char const StatusVar_Name[MAX_VARIABLE_NAME_LENGTH] = "NvStrapsReBarStatus";
 #if defined(UEFI_SOURCE) || defined(EFIAPI)
 static uint_least64_t statusVar[NvStraps_GPU_MAX_COUNT + 1u] = { StatusVar_NotLoaded, StatusVar_NotLoaded };
 
-static inline uint_least16_t MakeBusLocation(uint_least8_t bus, uint_least8_t device, uint_least8_t function)
+uint_least16_t MakeBusLocation(uint_least8_t bus, uint_least8_t device, uint_least8_t function)
 {
     return (uint_least16_t)bus << 8u | (((uint_least16_t)device & 0b0001'1111u) << 3u) | (function & 0b0111u);
 }
 
-static inline UINT16 PciAddressToBusLocation(UINTN pciAddress)
+UINT16 PciAddressToBusLocation(UINTN pciAddress)
 {
     return MakeBusLocation(pciAddress >> 24u & 0xFFu, pciAddress >> 16u & 0xFFu, pciAddress >> 8u & 0xFFu);
 }

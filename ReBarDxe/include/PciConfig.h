@@ -35,17 +35,8 @@ bool pciIsVgaController(uint_least32_t pciClassReg);
 
 #endif	    // defined(UEFI_SOURCE)
 
-inline void pciUnpackAddress(UINTN pciAddress, uint_least8_t *bus, uint_least8_t *dev, uint_least8_t *fun)
-{
-    *bus = pciAddress >> 24u & BYTE_BITMASK;
-    *dev = pciAddress >> 16u & BYTE_BITMASK;
-    *fun = pciAddress >>  8u & BYTE_BITMASK;
-}
-
-inline uint_least16_t pciPackLocation(uint_least8_t bus, uint_least8_t dev, uint_least8_t fun)
-{
-    return (uint_least16_t) bus << BYTE_BITSIZE | dev << 3u & 0b1111'1000u | fun & 0b0111u;
-}
+void pciUnpackAddress(UINTN pciAddress, uint_least8_t *bus, uint_least8_t *dev, uint_least8_t *fun);
+uint_least16_t pciPackLocation(uint_least8_t bus, uint_least8_t dev, uint_least8_t fun);
 
 
 #endif          // !defined(NV_STRAPS_REBAR_PCI_CONFIG_H)

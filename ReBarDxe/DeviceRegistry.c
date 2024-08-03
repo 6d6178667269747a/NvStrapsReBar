@@ -181,32 +181,32 @@ static UINT16 Turing_Device_List_Skip[] =
         UINT16_C(0x1E02),               // TU102 [Titan RTX] 24GB
 };
 
-static inline bool inRange(UINT16 value, IDRange const *range)
+bool inRange(UINT16 value, IDRange const *range)
 {
     return range->first <= value && value <= range->last;
 }
 
-static inline bool isTU102(UINT16 deviceID)
+bool isTU102(UINT16 deviceID)
 {
     return inRange(deviceID, &PCI_ID_RANGE_TU102);
 }
 
-static inline bool isTU104(UINT16 deviceID)
+bool isTU104(UINT16 deviceID)
 {
     return inRange(deviceID, &PCI_ID_RANGE_TU104);
 }
 
-static inline bool isTU106(UINT16 deviceID)
+bool isTU106(UINT16 deviceID)
 {
     return inRange(deviceID, &PCI_ID_RANGE_TU106);
 }
 
-static inline bool isTU116(UINT16 deviceID)
+bool isTU116(UINT16 deviceID)
 {
     return inRange(deviceID, &PCI_ID_RANGE_TU116);
 }
 
-static inline bool isTU117(UINT16 deviceID)
+bool isTU117(UINT16 deviceID)
 {
     return inRange(deviceID, &PCI_ID_RANGE_TU117);
 }
@@ -221,7 +221,7 @@ typedef struct RegistryRange
     UINT16 const *first, *last;
 }
     RegistryRange;
-static struct RegistryGroup
+struct RegistryGroup
 {
     BarSizeSelector barSize;
     RegistryRange    values;

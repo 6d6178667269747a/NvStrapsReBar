@@ -16,7 +16,7 @@
 #include "ReBar.h"
 #include "PciConfig.h"
 
-inline bool PCI_POSSIBLE_ERROR(UINT32 val)
+bool PCI_POSSIBLE_ERROR(UINT32 val)
 {
     return val == MAX_UINT32;
 };
@@ -34,38 +34,38 @@ UINT64 pciAddrOffset(UINTN pciAddress, INTN offset)
 }
 
 // created these functions to make it easy to read as we are adapting alot of code from Linux
-static inline EFI_STATUS pciReadConfigDword(UINTN pciAddress, INTN pos, UINT32 *buf)
+EFI_STATUS pciReadConfigDword(UINTN pciAddress, INTN pos, UINT32 *buf)
 {
     return pciRootBridgeIo->Pci.Read(pciRootBridgeIo, EfiPciWidthUint32, pciAddrOffset(pciAddress, pos), 1u, buf);
 }
 
 // Using the PollMem function silently breaks UEFI boot (the board needs flash recovery...)
-static inline EFI_STATUS pciPollConfigDword(UINTN pciAddress, INTN pos, UINT64 mask, UINT64 value, UINT64 delay, UINT64 *result)
+EFI_STATUS pciPollConfigDword(UINTN pciAddress, INTN pos, UINT64 mask, UINT64 value, UINT64 delay, UINT64 *result)
 {
     return pciRootBridgeIo->PollMem(pciRootBridgeIo, EfiPciWidthUint32, pciAddrOffset(pciAddress, pos), mask, value, delay, result);
 }
 
-static inline EFI_STATUS pciWriteConfigDword(UINTN pciAddress, INTN pos, UINT32 *buf)
+EFI_STATUS pciWriteConfigDword(UINTN pciAddress, INTN pos, UINT32 *buf)
 {
     return pciRootBridgeIo->Pci.Write(pciRootBridgeIo, EfiPciWidthUint32, pciAddrOffset(pciAddress, pos), 1u, buf);
 }
 
-static inline EFI_STATUS pciReadConfigWord(UINTN pciAddress, INTN pos, UINT16 *buf)
+EFI_STATUS pciReadConfigWord(UINTN pciAddress, INTN pos, UINT16 *buf)
 {
     return pciRootBridgeIo->Pci.Read(pciRootBridgeIo, EfiPciWidthUint16, pciAddrOffset(pciAddress, pos), 1u, buf);
 }
 
-static inline EFI_STATUS pciWriteConfigWord(UINTN pciAddress, INTN pos, UINT16 *buf)
+EFI_STATUS pciWriteConfigWord(UINTN pciAddress, INTN pos, UINT16 *buf)
 {
     return pciRootBridgeIo->Pci.Write(pciRootBridgeIo, EfiPciWidthUint16, pciAddrOffset(pciAddress, pos), 1u, buf);
 }
 
-static inline EFI_STATUS pciReadConfigByte(UINTN pciAddress, INTN pos, UINT8 *buf)
+EFI_STATUS pciReadConfigByte(UINTN pciAddress, INTN pos, UINT8 *buf)
 {
     return pciRootBridgeIo->Pci.Read(pciRootBridgeIo, EfiPciWidthUint8, pciAddrOffset(pciAddress, pos), 1u, buf);
 }
 
-static inline EFI_STATUS pciWriteConfigByte(UINTN pciAddress, INTN pos, UINT8 *buf)
+EFI_STATUS pciWriteConfigByte(UINTN pciAddress, INTN pos, UINT8 *buf)
 {
     return pciRootBridgeIo->Pci.Write(pciRootBridgeIo, EfiPciWidthUint8, pciAddrOffset(pciAddress, pos), 1u, buf);
 }
@@ -447,6 +447,18 @@ void pciRestoreDeviceConfig(UINTN pciAddress, UINT32 saveArea[2u])
 
     if (efiError)
         SetEFIError(EFIError_PCI_DeviceBARRestore, status);
+}
+
+void pciUnpackAddress(UINTN pciAddress, uint_least8_t *bus, uint_least8_t *dev, uint_least8_t *fun)
+{
+    *bus = pciAddress >> 24u & BYTE_BITMASK;
+    *dev = pciAddress >> 16u & BYTE_BITMASK;
+    *fun = pciAddress >>  8u & BYTE_BITMASK;
+}
+
+uint_least16_t pciPackLocation(uint_least8_t bus, uint_least8_t dev, uint_least8_t fun)
+{
+    return (uint_least16_t) (bus << BYTE_BITSIZE) | ((dev << 3u) & 0b1111'1000u) | (fun & 0b0111u);
 }
 
 // vim: ft=cpp

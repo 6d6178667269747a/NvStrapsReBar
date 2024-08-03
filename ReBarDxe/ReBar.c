@@ -50,7 +50,7 @@ EFI_HANDLE reBarImageHandle = NULL;
 NvStrapsConfig *config = NULL;
 
 // find highest-order bit set and return the bit index
-static inline uint_least8_t highestBitIndex(uint_least32_t val)
+uint_least8_t highestBitIndex(uint_least32_t val)
 {
     uint_least8_t bitIndex = (uint_least8_t)(sizeof val * BYTE_BITSIZE - 1u);
     uint_least32_t checkBit = (uint_least32_t)1u  << bitIndex;
@@ -61,7 +61,7 @@ static inline uint_least8_t highestBitIndex(uint_least32_t val)
     return bitIndex;
 }
 
-static inline uint_least8_t min(uint_least8_t val1, uint_least8_t val2)
+uint_least8_t min(uint_least8_t val1, uint_least8_t val2)
 {
     return val1 < val2 ? val1 : val2;
 }
