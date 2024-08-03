@@ -62,8 +62,10 @@ void NvStraps_EnumDevice(UINTN pciAddress, uint_least16_t vendorId, uint_least16
 
 bool NvStraps_CheckDevice(UINTN pciAddress, uint_least16_t vendorId, uint_least16_t deviceId, uint_least16_t *subsysVenID, uint_least16_t *subsysDevID)
 {
-    if (vendorId == TARGET_GPU_VENDOR_ID && NvStrapsConfig_IsGpuConfigured(config) && pciIsVgaController(pciDeviceClass(pciAddress)))
+    if (vendorId != TARGET_GPU_VENDOR_ID || !NvStrapsConfig_IsGpuConfigured(config) || !pciIsVgaController(pciDeviceClass(pciAddress)))
     {
+        return false;
+    }
     EFI_STATUS status = pciReadDeviceSubsystem(pciAddress, subsysVenID, subsysDevID);
 
     if (EFI_ERROR(status))
