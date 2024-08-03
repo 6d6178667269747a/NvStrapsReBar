@@ -100,7 +100,7 @@ static bool FreeSetupVariable(BYTE *data)
     return true;
 }
 
-static void LStringCopy(CHAR16 *newVarName, CHAR16 const *varName, size_t len)
+static void LStringCopy(CHAR16 *newVarName, CHAR16 const *varName, UINTN len)
 {
     CHAR16 const *varNameLimit = varName + len;
 
@@ -133,7 +133,7 @@ typedef struct UefiString
 }
     UefiString;
 
-static bool AllocateUefiString(UefiString *str, size_t stringCapacity)
+static bool AllocateUefiString(UefiString *str, UINTN stringCapacity)
 {
     EFI_STATUS status = gBS->AllocatePool(EfiBootServicesData, stringCapacity * sizeof *str->ptr, (VOID **)&str->ptr);
 
@@ -172,7 +172,7 @@ static bool DeallocateUefiString(UefiString *str)
     return true;
 }
 
-static bool ReallocateUefiString(UefiString *str, size_t stringCapacity)
+static bool ReallocateUefiString(UefiString *str, UINTN stringCapacity)
 {
     CHAR16 *newStr = NULL;
     EFI_STATUS status = gBS->AllocatePool(EfiBootServicesData, stringCapacity * sizeof *newStr, (VOID **)&newStr);

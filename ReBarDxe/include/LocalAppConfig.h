@@ -40,10 +40,7 @@
     using std::uint_least64_t;
     static_assert(std::numeric_limits<unsigned char>::radix == 2u, "Binary digits expected for char representation");
 #else
-# include <stdint.h>
 # include <limits.h>
-# include <errno.h>
-    typedef uintptr_t UINTN;
 #endif
 
 enum
